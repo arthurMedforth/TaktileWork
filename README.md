@@ -1,1 +1,1 @@
-#Taktile case study work
+Contains work relating to third party KYC, Credit checking and income validations
