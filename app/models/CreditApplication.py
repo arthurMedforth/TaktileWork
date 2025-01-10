@@ -1,49 +1,59 @@
 from pydantic import BaseModel
 from typing import Optional
 
-# Define Address model
-class Address(BaseModel):
-    street: str
-    city: str
-    state: str
-    postal_code: str
-    country: str
-
-# Define User model
-class User(BaseModel):
-    user_id: str
+# Submodels for personal details, address, employment, etc.
+class PersonalDetails(BaseModel):
     first_name: str
     last_name: str
+    date_of_birth: str  # You can use `datetime.date` if you want proper validation
+    ssn: str
     email: str
     phone_number: str
-    dob: str
-    address: Address
 
-# Define Employment model
-class Employment(BaseModel):
-    status: str  # employed, self-employed, unemployed
-    employer_name: str
-    position: str
-    annual_income: float
-    employment_start_date: str
+class Address(BaseModel):
+    street_address: str
+    city: str
+    state: str
+    zip_code: str
+    country: str
 
-# Define Financial Info model
-class FinancialInfo(BaseModel):
-    requested_credit_limit: float
+class BankAccount(BaseModel):
+    account_type: str
+    bank_name: str
+    account_number: str
+    routing_number: str
+
+class FinancialDetails(BaseModel):
     existing_debt: float
     monthly_expenses: float
-
-# Define Credit History model
-class CreditHistory(BaseModel):
     credit_score: int
-    total_credit_available: float
-    open_credit_lines: int
+    bank_account: BankAccount
 
-# Define the main CreditApplication model that combines everything
+class EmploymentDetails(BaseModel):
+    employer_name: str
+    job_title: str
+    annual_income: float
+    employment_status: str
+    work_phone: str
+
+class AdditionalInfo(BaseModel):
+    desired_credit_limit: float
+    purpose_of_credit: str
+    referred_by: str
+
+class Consent(BaseModel):
+    terms_accepted: bool
+    credit_check_consent: bool
+    data_sharing_consent: bool
+
+# Main CreditApplication model
 class CreditApplication(BaseModel):
     application_id: str
-    user: User
-    employment: Employment
-    financial_info: FinancialInfo
-    credit_history: CreditHistory
-    other: Optional[dict] = None  # This is for any other additional info (e.g., referral_code, marketing_opt_in)
+    personal_details: PersonalDetails
+    address: Address
+    employment_details: EmploymentDetails
+    financial_details: FinancialDetails
+    additional_info: AdditionalInfo
+    consent: Consent
+
+# Example usag

@@ -1,23 +1,23 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List, Optional
-from app.models.CreditApplication import CreditApplication
 import json
+
+from app.models.CreditApplication import CreditApplication
+from .lambda_functions import CreditReportCheck, KYC, IncomeVerification
 
 # Create FastAPI app
 app = FastAPI()
 
-# Stub of configuration response
 def fetch_workflow_config():
-    """
-    Stub function to simulate fetching workflow configuration from the database.
-    """
+    # Mocked response of fetch_workflow_config
     return {
         "workflow_id": "credit_app_workflow_001",
         "stages": [
             {
                 "stage_id": 1,
-                "lambda_function": "check_fraud_score",
+                "lambda_function": "KYC",
+                "rules": [],
                 "parameters": {
                     "fraud_score_threshold": 75
                 },
@@ -25,7 +25,17 @@ def fetch_workflow_config():
             },
             {
                 "stage_id": 2,
-                "lambda_function": "fetch_credit_report",
+                "lambda_function": "CreditHistory",
+                "rules": [
+                    {
+                        "rule_id": 1,
+                        "rule_name": "Credit Score Above Threshold",
+                        "threshold": 650,
+                        "parameter": "creditScore",
+                        "operation": "gt",
+                        "active": True
+                    }
+                ],
                 "parameters": {
                     "credit_bureau": "Experian"
                 },
@@ -33,7 +43,8 @@ def fetch_workflow_config():
             },
             {
                 "stage_id": 3,
-                "lambda_function": "verify_income",
+                "lambda_function": "IncomeVerification",
+                "rules": [],
                 "parameters": {
                     "income_threshold": 30000
                 },
@@ -41,6 +52,18 @@ def fetch_workflow_config():
             }
         ]
     }
+
+
+def call_lambda(function_name: str, payload: dict, rules: dict, params: dict) -> dict:
+    if function_name == 'KYC':
+        response = KYC(payload, rules, params)
+    elif function_name == 'CreditHistory':
+        response = CreditReportCheck(payload, rules, params)
+    elif function_name == "IncomeVerification":
+        response = IncomeVerification(payload, rules, params)
+    else:
+        raise ValueError("No such Lambda function exists")
+    return response
 
 
 # Define a simple route
@@ -52,7 +75,23 @@ def read_root():
 # Define POST route that expects the DataModel
 @app.post("/evaluateCreditApp")
 def evaluate_credit_application(application: CreditApplication):
-    workflow_json = fetch_workflow_config()
-    workflow = json.loads(workflow_json)
-
-    return {"message": f"Application {application.application_id} received successfully."}
+    # Fetch the workflow configuration (presumably from a mock function or a database)
+    workflow = fetch_workflow_config()
+    
+    # Initialize an empty list to store the responses from each stage
+    stage_responses = []
+    
+    # Loop through the stages in the workflow
+    for stage in workflow["stages"]:
+        # Call the lambda for each stage and capture the response
+        response = call_lambda(stage["lambda_function"], application, stage["rules"], stage["parameters"])
+        
+        # Append the response along with stage information to the stage_responses list
+        stage_responses.append({
+            "stage_id": stage["stage_id"],
+            "lambda_function": stage["lambda_function"],
+            "response": response
+        })
+    
+    # Return the combined response
+    return {"applicationResult": stage_responses}
