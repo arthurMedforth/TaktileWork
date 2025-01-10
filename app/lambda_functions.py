@@ -1,7 +1,7 @@
 import json
 from typing import Dict
 
-def KYC(payload, rules, params):
+def KYC(payload: Dict, rules: Dict, params: Dict) -> Dict:
     return {
         "status": "success",
         "message": "KYC check completed successfully",
@@ -39,7 +39,7 @@ def KYC(payload, rules, params):
         }
     }
     
-def CreditReportCheck(payload, rules, params):
+def CreditReportCheck(payload, rules, params) -> Dict:
     with open('/Users/arthurmedforth/Taktile work/experian.json', '+r') as experian_report:
         experian_response = json.load(experian_report)   
 
@@ -63,7 +63,7 @@ def CreditReportCheck(payload, rules, params):
             response["status"] = f"Rule {rule['rule_name']} failed - Credit score: {experian_response[rule['parameter']]['score']} - {rule['threshold']}"
     return response
 
-def IncomeVerification(payload: Dict, rules: Dict, params: Dict):
+def IncomeVerification(payload: Dict, rules: Dict, params: Dict) -> Dict:
     return {
         "status": "success",
         "message": "Income verification completed",
@@ -94,7 +94,7 @@ def IncomeVerification(payload: Dict, rules: Dict, params: Dict):
         }
     }
 
-def CreditLimitComputation(payload: Dict, params: Dict) -> float:
+def CreditLimitComputation(payload: Dict, params: Dict) -> Dict:
     response = {}
     # Parameters
     interest_rate = params["interest_rate"] # 2% monthly interest rate
