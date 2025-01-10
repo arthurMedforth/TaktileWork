@@ -4,7 +4,7 @@ from typing import List, Optional
 import json
 
 from app.models.CreditApplication import CreditApplication
-from .lambda_functions import CreditReportCheck, KYC, IncomeVerification
+from .lambda_functions import CreditReportCheck, KYC, IncomeVerification, CreditLimitComputation
 
 # Create FastAPI app
 app = FastAPI()
@@ -49,6 +49,16 @@ def fetch_workflow_config():
                     "income_threshold": 30000
                 },
                 "description": "Ensure the applicant's verified income meets the required threshold."
+            },
+            {
+                "stage_id": 4,
+                "lambda_function": "CreditLimitComputation",
+                "rules": [],
+                "parameters": {
+                    "interest_rate": 0.02,
+                    "max_dti_ratio": 0.4
+                },
+                "description": "Compute credit limit based on verified income and debt habits."
             }
         ]
     }
@@ -61,6 +71,8 @@ def call_lambda(function_name: str, payload: dict, rules: dict, params: dict) ->
         response = CreditReportCheck(payload, rules, params)
     elif function_name == "IncomeVerification":
         response = IncomeVerification(payload, rules, params)
+    elif function_name == "CreditLimitComputation":
+        response = CreditLimitComputation(payload, params)
     else:
         raise ValueError("No such Lambda function exists")
     return response
@@ -84,7 +96,7 @@ def evaluate_credit_application(application: CreditApplication):
     # Loop through the stages in the workflow
     for stage in workflow["stages"]:
         # Call the lambda for each stage and capture the response
-        response = call_lambda(stage["lambda_function"], application, stage["rules"], stage["parameters"])
+        response = call_lambda(stage["lambda_function"], stage_responses, stage["rules"], stage["parameters"])
         
         # Append the response along with stage information to the stage_responses list
         stage_responses.append({
