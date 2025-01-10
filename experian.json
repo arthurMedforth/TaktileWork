@@ -1,0 +1,47 @@
+{
+    "applicant": {
+        "name": "John Q Consumer",
+        "address": "123 Any Street, Anytown, ST 12345",
+        "ssn": "XXX-XX-1234"
+    },
+    "creditScore": {
+        "score": 748,
+        "range": {
+        "min": 300,
+        "max": 850
+        }
+    },
+    "accounts": [
+        {
+        "type": "Revolving",
+        "accountName": "BANK OF AMERICA",
+        "accountNumber": "4XXX-XXXX-XXXX-1234",
+        "dateOpened": "05/2015",
+        "creditLimit": 10000,
+        "balance": 1200,
+        "paymentStatus": "Current"
+        },
+        {
+        "type": "Installment",
+        "accountName": "FIA CARD SERVICES",
+        "accountNumber": "5XXX-XXXX-XXXX-5678",
+        "dateOpened": "09/2011",
+        "creditLimit": 15000,
+        "balance": 0,
+        "paymentStatus": "Closed"
+        }
+    ],
+    "inquiries": [
+        {
+        "date": "06/05/2023",
+        "inquiringCompany": "CITI"
+        },
+        {
+        "date": "03/20/2023",
+        "inquiringCompany": "CAPITAL ONE"
+        }
+    ],
+    "publicRecords": [],
+    "collections": []
+}
+  
